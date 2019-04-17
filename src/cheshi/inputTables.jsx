@@ -38,7 +38,7 @@ class EditableCell extends React.Component {
       handleSave({ ...record, ...values });
     });
   }
-
+  
   render() {
     const { editing } = this.state;
     const {
@@ -50,6 +50,7 @@ class EditableCell extends React.Component {
       handleSave,
       ...restProps
     } = this.props;
+    console.log(record)
     return (
       <td {...restProps}>
         {editable ? (
@@ -68,8 +69,8 @@ class EditableCell extends React.Component {
                     })(
                       <Input
                         ref={node => (this.input = node)}
-                        onPressEnter={this.save}
-                        onBlur={this.save}
+                        onPressEnter={this.save}//按下回车
+                        onBlur={this.save}//失去焦点
                       />
                     )}
                   </FormItem>
@@ -124,11 +125,13 @@ export default  class EditableTable extends React.Component {
         name: 'Edward King 0',
         age: '32',
         address: 'London, Park Lane no. 0',
+        heheda:true
       }, {
         key: '1',
         name: 'Edward King 1',
         age: '32',
         address: 'London, Park Lane no. 1',
+        heheda:true
       }],
       count: 2,
     };
@@ -154,6 +157,7 @@ export default  class EditableTable extends React.Component {
   }
 
   handleSave = (row) => {
+    console.log(row)
     const newData = [...this.state.dataSource];
     const index = newData.findIndex(item => row.key === item.key);
     const item = newData[index];
@@ -172,21 +176,35 @@ export default  class EditableTable extends React.Component {
         cell: EditableCell,
       },
     };
+    console.log(components)
+
     const columns = this.columns.map((col) => {
       if (!col.editable) {
         return col;
       }
       return {
         ...col,
-        onCell: record => ({
-          record,
-          editable: col.editable,
-          dataIndex: col.dataIndex,
-          title: col.title,
-          handleSave: this.handleSave,
-        }),
+        onCell: record => {
+            // console.log(record,col)
+           return {
+              record,
+              editable: col.editable,
+              dataIndex: col.dataIndex,
+              title: col.title,
+              handleSave: this.handleSave,
+            }
+        },
       };
     });
+    const rowSelection = {
+        onChange: (selectedRowKeys, selectedRows) => {
+            console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+        },
+        getCheckboxProps: record => ({
+            disabled: record.name === 'Disabled User', // Column configuration not to be checked
+            name: record.name,
+        }),
+    };
     return (
       <div>
         <Button onClick={this.handleAdd} type="primary" style={{ marginBottom: 16 }}>
@@ -198,6 +216,7 @@ export default  class EditableTable extends React.Component {
           bordered
           dataSource={dataSource}
           columns={columns}
+          rowSelection={rowSelection}
         />
       </div>
     );
