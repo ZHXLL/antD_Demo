@@ -1,0 +1,25 @@
+
+.ant-table-tbody > tr > td.tabLeft{
+    padding-right:0px; 
+}
+.ant-table-tbody > tr > td.tabRight{
+    padding-left:0px; 
+}
+.breadBox{
+    padding-left: 50px;
+    text-align: left;
+    font-size: 14px;
+    
+}
+.breadBox a{
+    display: block;
+    float: left;
+    padding-right: 10px;
+    
+}
+.uploadq{
+    overflow: hidden;
+}
+.uploadq>*{
+    float: left;
+}
