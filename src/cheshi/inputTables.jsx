@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Table, Input, Button, Popconfirm, Form,
+  Table, Input, Button, Popconfirm, Form
 } from 'antd';
 
 const FormItem = Form.Item;
@@ -17,23 +17,21 @@ const EditableFormRow = Form.create()(EditableRow);
 class EditableCell extends React.Component {
   constructor(props){
     super();
-    console.log(props);
   }
   
   toggleEdit = () => {
     // const editing = !this.state.editing;
     // this.setState({ editing }, () => {
     //   if (editing) {
-        // this.input.focus();
+    //     this.input.focus();
     //   }
     // });
   }
   save = (e) => {
     const { record, handleSave} = this.props;
+    console.log(this.props);
     record.displayInp = false;
     this.setState()
-    console.log(this.props)
-    console.log()
     this.form.validateFields((error, values) => {
       if (error && error[e.currentTarget.id]) {
         return;
@@ -127,14 +125,12 @@ export default  class EditableTable extends React.Component {
         age: '31',
         address: 'London, Park Lane no. 0',
         displayInp:false,
-        ondisplayInp:this.ondisplayInp
       }, {
         key: '1',
         name: 'Edward King 1',
         age: '32',
         address: 'London, Park Lane no. 1',
         displayInp:false,
-        ondisplayInp:this.ondisplayInp
       }],
       count: 2,
     };

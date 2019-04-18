@@ -23,3 +23,8 @@
 .uploadq>*{
     float: left;
 }
+
+.path_have{
+    padding-right:10px;
+}
+.path_have:hover{text-decoration:underline;}

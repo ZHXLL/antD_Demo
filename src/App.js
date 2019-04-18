@@ -13,7 +13,7 @@ class App extends Component {
   render() {
     return (
       <div className="App"> 
-        <Cheshi></Cheshi>
+        {/* <Cheshi></Cheshi> */}
         {/* <Demo></Demo> */}
         {/* <DemoTrr/> */}
         <Table></Table>

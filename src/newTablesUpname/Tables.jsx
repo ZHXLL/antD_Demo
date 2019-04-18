@@ -1,36 +1,12 @@
 import React, { Component } from 'react';
-import { Table, Tag, Breadcrumb, Upload, Button, Icon } from 'antd';
+import { Table, Tag, Breadcrumb, Upload, Button, Icon,Input,Popconfirm } from 'antd';
 import axios from 'axios';
 import "./Tables.css";
+import {EditableFormRow,EditableCell} from "./Upname";
 const ButtonGroup = Button.Group;
 let count = 0;
 //表格的文件属性
-const columns = [{
-  title: '',
-  dataIndex: 'isPath',
-  className: "tabLeft",
-  width: "50px",
-  render: text => {
-    if (text) {
-      return <Icon style={{fontSize:"20px"}} type="folder" />
-    } else {
-      return <Icon style={{fontSize:"20px"}} type="file" />
-    }
-  },
-}, {
-  title: '',
-  dataIndex: 'name',
-  className: "tabRight",
-  render: text => <Button >{text}</Button>,
-}, {
-  title: '',
-  dataIndex: 'age',
-}, {
-  title: '',
-  dataIndex: 'address',
-}];
-
-
+// let columns = ;
 // 显示面板的内容的数据结构
 const data = [{
   key: '1',
@@ -38,24 +14,28 @@ const data = [{
   isPath: true,
   age: 32,
   address: 'New York No. 1 Lake Park',
+  displayInp:false
 }, {
   key: '2',
   name: 'Jim Green',
   isPath: true,
   age: 42,
   address: 'London No. 1 Lake Park',
+  displayInp:false
 }, {
   key: '3',
   name: 'Joe Black',
   isPath: true,
   age: 32,
   address: 'Sidney No. 1 Lake Park',
+  displayInp:false
 }, {
   key: '4',
   name: 'Joe Black',
   isPath: true,
   age: 32,
   address: 'Sidney No. 1 Lake Park',
+  displayInp:false
 },
 {
   key: '6',
@@ -63,6 +43,7 @@ const data = [{
   isPath: false,
   age: 32,
   address: 'Sidney No. 1 Lake Park',
+  displayInp:false
 }];
 
 export default class componentName extends Component {
@@ -70,7 +51,31 @@ export default class componentName extends Component {
     super();
     this.state = {
       dataArr: data,//默认数据 根目录文件夹的信息
-      columns:columns,
+      columns: [{
+        title: '',
+        dataIndex: 'isPath',
+        className: "tabLeft",
+        width: "50px",
+        render: text => {
+          if (text) {
+            return <Icon style={{ fontSize: "20px" }} type="folder" />
+          } else {
+            return <Icon style={{ fontSize: "20px" }} type="file" />
+          }
+        },
+      }, {
+        title: '',
+        dataIndex: 'name',
+        className: "tabRight",
+        editable: true,
+        render: (text,e) => <a onClick={(on)=>{this.toPath(e,on)}} className="path_have">{text}</a>,
+      }, {
+        title: '',
+        dataIndex: 'age',
+      }, {
+        title: '',
+        dataIndex: 'address',
+      }],
       selectedRowKeys: [],//默认选中事件
       bread: [{//存储所有路径的guid 路径名称  bread.length-1 代表当前路径信息
         uid: "0x001",
@@ -79,62 +84,114 @@ export default class componentName extends Component {
     }
   }
 
-  
+
   rename = () => {//重命名
-    // let data = 
-    console.log()
+    const key = this.state.selectedRowKeys[0];
+    let newData = [...this.state.dataArr];
+    newData.find((item)=>item.key==key).displayInp = true;
+    this.setState({
+      dataArr:newData
+    });
   }
+  newFolder = ()=>{//新建文件夹
+    console.log(1);
+    let data = [...this.state.dataArr];
+    data.unshift({
+      key: parseInt(Math.random()*10*100),
+      name: '新建文件夹',
+      isPath: true,
+      age: 32,
+      address: 'Sidney No. 1 Lake Park',
+      displayInp:true
+    })
+    this.setState({
+      dataArr:data,
+      selectedRowKeys:[data[0].key]
+    });
+
+  }
+  deleteName = ()=>{
+    let {selectedRowKeys:keyArr,dataArr} = this.state;
+    let newDataArr = dataArr;
+    keyArr.forEach((item)=>{
+      newDataArr = newDataArr.filter((items)=>items.key!=item)
+    });
+    this.setState({
+      dataArr:newDataArr,
+      selectedRowKeys:[]
+    })
+  }
+
+  toPath(record,e){
+    // console.log(e)
+    e?e.stopPropagation():
+    setTimeout(()=>{clearTimeout(this.state.t)},0)
+    this.setState({
+      selectedRowKeys: [],//清除选中状态
+      bread: [...this.state.bread, { uid: "0x002", name: record.name }],//添加面包屑
+      dataArr: [{
+        key: '1',
+        name: '路飞',
+        isPath: true,
+        age: 32,
+        address: 'Nk',
+      }, {
+        key: '2',
+        name: '索隆',
+        isPath: true,
+        age: 42,
+        address: 'London No. 1 Lake Park',
+      }, {
+        key: '3',
+        name: '山治',
+        isPath: true,
+        age: 32,
+        address: 'Sidney No. 1 Lake Park',
+      }]
+    });
+  }
+
+
   onclickEx = (record) => {//单机文件模拟变动 and 双击文件夹
     return {
       onClick: () => {
         count += 1;
-        setTimeout(() => {
+        this.state.t = setTimeout(() => {
           if (count === 1) {
             this.selectRow(record);
           } else if (count === 2) {// 双击文件夹发送请求进入下一个文件夹
-            console.log(record)
             if (!record.isPath) { return }
-            this.setState({
-              selectedRowKeys: [],//清除选中状态
-              bread: [...this.state.bread, { uid: "0x002", name: record.name }],//添加面包屑
-              dataArr: [{
-                key: '1',
-                name: '路飞',
-                isPath: true,
-                age: 32,
-                address: 'Nk',
-              }, {
-                key: '2',
-                name: '索隆',
-                isPath: true,
-                age: 42,
-                address: 'London No. 1 Lake Park',
-              }, {
-                key: '3',
-                name: '山治',
-                isPath: true,
-                age: 32,
-                address: 'Sidney No. 1 Lake Park',
-              }]
-            })
+            // console.log(e)
+            this.toPath(record);
           }
           count = 0;
         }, 150);
       }
     }
   }
-
   onChange = (e) => {//选中事件
-    console.log(e)
+    console.log(1);
+    console.log(e);
   }
   selectRow = (record) => {//联动事件
-    console.log(record);
     const selectedRowKeys = [record.key];
     this.setState({ selectedRowKeys });
   }
   onSelectedRowKeysChange = (selectedRowKeys) => {
     this.setState({ selectedRowKeys });
   }
+  handleSave = (row) => {
+    const newData = [...this.state.dataArr];
+    const index = newData.findIndex(item => row.key === item.key);
+    const item = newData[index];
+    newData.splice(index, 1, {
+      ...item,
+      ...row,
+    });
+    this.setState({ dataArr: newData });
+    console.log("重命名好了")
+  }
+
   render() {
     let _this = this;
     let prop = {
@@ -212,13 +269,39 @@ export default class componentName extends Component {
         console.log(e);
       }
     }
+    const components = {
+      body: {
+        row: EditableFormRow,
+        cell: EditableCell,
+      },
+    };
 
-
+    const columns = this.state.columns.map((col) => {
+      if (!col.editable) {
+        return col;
+      }
+      return {
+        ...col,
+        onCell: record => {
+           return {
+              record,
+              editable: col.editable,
+              dataIndex: col.dataIndex,
+              title: col.title,
+              handleSave: this.handleSave,
+            }
+        },
+      };
+    });
     //联动选择时的功能不能动
     const { selectedRowKeys } = this.state;
     const rowSelection = {
       selectedRowKeys,
       onChange: this.onSelectedRowKeysChange,
+      getCheckboxProps: record => ({
+          disabled: record.name === 'Disabled User', // Column configuration not to be checked
+          name: record.name,
+      })
     };
     return (
       <div>
@@ -235,9 +318,14 @@ export default class componentName extends Component {
                 <Icon type="upload" />上传文件夹
               </Button>
             </Upload>
-            <Button>
-              <Icon type="plus" />新建文件夹
-          </Button>
+            <Button onClick={this.newFolder}>
+                <Icon type="plus" />新建文件夹
+            </Button>
+            {this.state.selectedRowKeys.length > 0 ? (
+              <Button onClick={this.deleteName}>
+                <Icon type="delete" />删除文件
+                </Button>) : ""
+            }
             {this.state.selectedRowKeys.length > 0 ? (
               <Button disabled={this.state.selectedRowKeys.length > 1 ? true : false} onClick={this.rename}>
                 <Icon type="plus" />重命名
@@ -263,6 +351,7 @@ export default class componentName extends Component {
           </Breadcrumb>
         </div>
         <Table
+          components={components}
           rowSelection={rowSelection}
           columns={columns}
           dataSource={this.state.dataArr}
