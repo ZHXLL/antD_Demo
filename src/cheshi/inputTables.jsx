@@ -4,7 +4,7 @@ import {
 } from 'antd';
 
 const FormItem = Form.Item;
-const EditableContext = React.createContext();
+const EditableContext = React.createContext(); 
 
 const EditableRow = ({ form, index, ...props }) => (
   <EditableContext.Provider value={form}>
@@ -15,21 +15,25 @@ const EditableRow = ({ form, index, ...props }) => (
 const EditableFormRow = Form.create()(EditableRow);
 
 class EditableCell extends React.Component {
-  state = {
-    editing: false,
+  constructor(props){
+    super();
+    console.log(props);
   }
-
+  
   toggleEdit = () => {
-    const editing = !this.state.editing;
-    this.setState({ editing }, () => {
-      if (editing) {
-        this.input.focus();
-      }
-    });
+    // const editing = !this.state.editing;
+    // this.setState({ editing }, () => {
+    //   if (editing) {
+        // this.input.focus();
+    //   }
+    // });
   }
-
   save = (e) => {
-    const { record, handleSave } = this.props;
+    const { record, handleSave} = this.props;
+    record.displayInp = false;
+    this.setState()
+    console.log(this.props)
+    console.log()
     this.form.validateFields((error, values) => {
       if (error && error[e.currentTarget.id]) {
         return;
@@ -38,9 +42,7 @@ class EditableCell extends React.Component {
       handleSave({ ...record, ...values });
     });
   }
-  
   render() {
-    const { editing } = this.state;
     const {
       editable,
       dataIndex,
@@ -50,15 +52,15 @@ class EditableCell extends React.Component {
       handleSave,
       ...restProps
     } = this.props;
-    console.log(record)
     return (
       <td {...restProps}>
         {editable ? (
           <EditableContext.Consumer>
             {(form) => {
+              console.log(form)
               this.form = form;
               return (
-                editing ? (
+                record.displayInp ? (
                   <FormItem style={{ margin: 0 }}>
                     {form.getFieldDecorator(dataIndex, {
                       rules: [{
@@ -78,7 +80,6 @@ class EditableCell extends React.Component {
                   <div
                     className="editable-cell-value-wrap"
                     style={{ paddingRight: 24 }}
-                    onClick={this.toggleEdit}
                   >
                     {restProps.children}
                   </div>
@@ -118,25 +119,29 @@ export default  class EditableTable extends React.Component {
           ) : null
       ),
     }];
-
+    
     this.state = {
       dataSource: [{
         key: '0',
         name: 'Edward King 0',
-        age: '32',
+        age: '31',
         address: 'London, Park Lane no. 0',
-        heheda:true
+        displayInp:false,
+        ondisplayInp:this.ondisplayInp
       }, {
         key: '1',
         name: 'Edward King 1',
         age: '32',
         address: 'London, Park Lane no. 1',
-        heheda:true
+        displayInp:false,
+        ondisplayInp:this.ondisplayInp
       }],
       count: 2,
     };
   }
-
+  ondisplayInp(){
+    // console.log("做修改了")
+  }
   handleDelete = (key) => {
     const dataSource = [...this.state.dataSource];
     this.setState({ dataSource: dataSource.filter(item => item.key !== key) });
@@ -144,20 +149,35 @@ export default  class EditableTable extends React.Component {
 
   handleAdd = () => {
     const { count, dataSource } = this.state;
-    const newData = {
-      key: count,
-      name: `Edward King ${count}`,
-      age: 32,
-      address: `London, Park Lane no. ${count}`,
-    };
+    // const newData = {
+    //   key: count,
+    //   name: `Edward King ${count}`,
+    //   age: 32,
+    //   address: `London, Park Lane no. ${count}`,
+    // };
+    // this.setState({
+    //   dataSource: [...dataSource, newData],
+    //   count: count + 1,
+    // });
+    
     this.setState({
-      dataSource: [...dataSource, newData],
-      count: count + 1,
-    });
+      dataSource:[
+        ...dataSource.splice(0,1),
+        {
+          key: '1',
+          name: 'Edward King 1',
+          age: '32',
+          address: 'London, Park Lane no. 1',
+          displayInp:true
+        }
+      ]
+    },(e)=>{
+      console.log(this.state);
+    })
   }
 
   handleSave = (row) => {
-    console.log(row)
+    // console.log(row)
     const newData = [...this.state.dataSource];
     const index = newData.findIndex(item => row.key === item.key);
     const item = newData[index];
@@ -167,7 +187,6 @@ export default  class EditableTable extends React.Component {
     });
     this.setState({ dataSource: newData });
   }
-
   render() {
     const { dataSource } = this.state;
     const components = {
@@ -176,7 +195,6 @@ export default  class EditableTable extends React.Component {
         cell: EditableCell,
       },
     };
-    console.log(components)
 
     const columns = this.columns.map((col) => {
       if (!col.editable) {
@@ -185,7 +203,6 @@ export default  class EditableTable extends React.Component {
       return {
         ...col,
         onCell: record => {
-            // console.log(record,col)
            return {
               record,
               editable: col.editable,

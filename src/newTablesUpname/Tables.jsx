@@ -6,27 +6,27 @@ const ButtonGroup = Button.Group;
 let count = 0;
 //表格的文件属性
 const columns = [{
-  title: '文件名',
+  title: '',
   dataIndex: 'isPath',
   className: "tabLeft",
   width: "50px",
   render: text => {
     if (text) {
-      return <Icon type="folder" />
+      return <Icon style={{fontSize:"20px"}} type="folder" />
     } else {
-      return <Icon type="file" />
+      return <Icon style={{fontSize:"20px"}} type="file" />
     }
   },
 }, {
   title: '',
   dataIndex: 'name',
   className: "tabRight",
-  render: text => <a href="javascript:;">{text}</a>,
+  render: text => <Button >{text}</Button>,
 }, {
-  title: '大小',
+  title: '',
   dataIndex: 'age',
 }, {
-  title: '修改日期',
+  title: '',
   dataIndex: 'address',
 }];
 
@@ -70,16 +70,16 @@ export default class componentName extends Component {
     super();
     this.state = {
       dataArr: data,//默认数据 根目录文件夹的信息
+      columns:columns,
       selectedRowKeys: [],//默认选中事件
       bread: [{//存储所有路径的guid 路径名称  bread.length-1 代表当前路径信息
         uid: "0x001",
         name: "src"
       }]
-
     }
   }
 
-
+  
   rename = () => {//重命名
     // let data = 
     console.log()
