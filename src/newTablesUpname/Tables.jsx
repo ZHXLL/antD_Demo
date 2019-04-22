@@ -4,7 +4,6 @@ import axios from 'axios';
 import "./Tables.css";
 import {EditableFormRow,EditableCell} from "./Upname";
 const ButtonGroup = Button.Group;
-let count = 0;
 //表格的文件属性
 // let columns = ;
 // 显示面板的内容的数据结构
@@ -12,37 +11,27 @@ const data = [{
   key: '1',
   name: 'John Brown',
   isPath: true,
-  age: 32,
-  address: 'New York No. 1 Lake Park',
   displayInp:false
 }, {
   key: '2',
   name: 'Jim Green',
   isPath: true,
-  age: 42,
-  address: 'London No. 1 Lake Park',
   displayInp:false
 }, {
   key: '3',
   name: 'Joe Black',
   isPath: true,
-  age: 32,
-  address: 'Sidney No. 1 Lake Park',
   displayInp:false
 }, {
   key: '4',
   name: 'Joe Black',
   isPath: true,
-  age: 32,
-  address: 'Sidney No. 1 Lake Park',
   displayInp:false
 },
 {
   key: '6',
   name: 'Joe Black',
   isPath: false,
-  age: 32,
-  address: 'Sidney No. 1 Lake Park',
   displayInp:false
 }];
 
@@ -68,13 +57,7 @@ export default class componentName extends Component {
         dataIndex: 'name',
         className: "tabRight",
         editable: true,
-        render: (text,e) => <a onClick={(on)=>{this.toPath(e,on)}} className="path_have">{text}</a>,
-      }, {
-        title: '',
-        dataIndex: 'age',
-      }, {
-        title: '',
-        dataIndex: 'address',
+        render: (text,e) => <a onClick={(on)=>{this.toPath(e)}} className="path_have">{text}</a>,
       }],
       selectedRowKeys: [],//默认选中事件
       bread: [{//存储所有路径的guid 路径名称  bread.length-1 代表当前路径信息
@@ -123,9 +106,7 @@ export default class componentName extends Component {
   }
 
   toPath(record,e){
-    // console.log(e)
-    e?e.stopPropagation():
-    setTimeout(()=>{clearTimeout(this.state.t)},0)
+    if (!record.isPath) { return }//如果是文件会怎么处理
     this.setState({
       selectedRowKeys: [],//清除选中状态
       bread: [...this.state.bread, { uid: "0x002", name: record.name }],//添加面包屑
@@ -150,25 +131,14 @@ export default class componentName extends Component {
       }]
     });
   }
-
-
   onclickEx = (record) => {//单机文件模拟变动 and 双击文件夹
     return {
       onClick: () => {
-        count += 1;
-        this.state.t = setTimeout(() => {
-          if (count === 1) {
-            this.selectRow(record);
-          } else if (count === 2) {// 双击文件夹发送请求进入下一个文件夹
-            if (!record.isPath) { return }
-            // console.log(e)
-            this.toPath(record);
-          }
-          count = 0;
-        }, 150);
+          this.toPath(record);
       }
     }
   }
+
   onChange = (e) => {//选中事件
     console.log(1);
     console.log(e);
@@ -189,7 +159,7 @@ export default class componentName extends Component {
       ...row,
     });
     this.setState({ dataArr: newData });
-    console.log("重命名好了")
+    console.log("重命名好了");
   }
 
   render() {
@@ -225,7 +195,6 @@ export default class componentName extends Component {
           });
         }
         formData.append(filename, file);
-
         axios
           .post(action, formData, {
             withCredentials,
@@ -251,7 +220,6 @@ export default class componentName extends Component {
             onSuccess(response, file);
           })
           .catch(onError);
-
         return {
           abort() {
             console.log('upload progress is aborted.');
@@ -260,13 +228,65 @@ export default class componentName extends Component {
       }
 
     }
+    // "proxy":"http://192.168.0.104:8000"
     let SingleProp = {
-      action: "http://localhost:8081/file_upload",
+      action: "/v1/filemanage/file",
       name: 'logo',
       showUploadList: false,
       directory: false,
-      onChange(e) {
-        console.log(e);
+      customRequest({
+        action,
+        data,
+        file,
+        headers,
+        onError,
+        onProgress,
+        onSuccess,
+        withCredentials,
+      }){
+        // console.log(this.bread[])
+        let fileData = {
+          root_id:file.uid,
+          file_name:file.name,
+          path:"src",
+          file
+        }
+        const formData = new FormData();
+        if (fileData) {
+          Object.keys(fileData).map(key => {
+            formData.append(key, fileData[key]);
+          });
+        }
+        axios
+          .post(action, formData, {
+            withCredentials,
+            headers,
+            onUploadProgress: ({ total, loaded }) => {
+              onProgress({ percent: Math.round(loaded / total * 100).toFixed(2) }, file);
+            },
+          })
+          .then(({ data: response }) => {
+            let pathAff = file.webkitRelativePath.split("/");//上传成功后应返回新文件夹的guid
+            _this.setState({
+              dataArr: [
+                {
+                  key: file.uid,
+                  name: pathAff[0],
+                  isPath: true,
+                  age: 32,
+                  address: 'New York No. 1 Lake Park',
+                },
+                ..._this.state.dataArr
+              ]
+            })
+            onSuccess(response, file);
+          })
+          .catch(onError);
+        return {
+          abort() {
+            console.log('upload progress is aborted.');
+          },
+        };
       }
     }
     const components = {
@@ -306,7 +326,6 @@ export default class componentName extends Component {
     return (
       <div>
         <div className="uploadq">
-
           <ButtonGroup>
             <Upload {...SingleProp}>
               <Button>
@@ -340,6 +359,15 @@ export default class componentName extends Component {
               this.state.bread.length > 1 ? <a href="">返回上一页</a> : ""
             }
           </div>
+          {/* <ol className="breadcrumb">
+            {
+              this.state.bread.map((item) => {
+                return (
+                  <li className="breadcrumb-item" key={item.uid}><a href="#">{item.name}</a></li>
+                )
+              })
+            }
+          </ol> */}
           <Breadcrumb >
             {
               this.state.bread.map((item) => {
@@ -356,6 +384,8 @@ export default class componentName extends Component {
           columns={columns}
           dataSource={this.state.dataArr}
           onChange={this.onChange}
+          pagination={false}
+          // onHeaderRow = {this.onclickEx}
           onRow={this.onclickEx}
         />
       </div>

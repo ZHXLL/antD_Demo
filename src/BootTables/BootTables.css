@@ -1,0 +1,11 @@
+.list-group-item.list_item{
+    text-align: left;
+    display: flex;
+}
+.list_item .item_txt{
+    flex:1;
+}
+.item_input_che{
+    /* flex: 1; */
+    width: 50px;
+}

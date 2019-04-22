@@ -28,3 +28,13 @@
     padding-right:10px;
 }
 .path_have:hover{text-decoration:underline;}
+
+.ant-table-row.ant-table-row-level-0{
+    cursor: pointer;
+}
+/* .breadcrumb-item + .breadcrumb-item::before {
+    display: inline-block;
+    padding-right: 0.5rem;
+    color: #6c757d;
+    content: ">";
+  } */
